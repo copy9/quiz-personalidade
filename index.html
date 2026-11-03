@@ -7,6 +7,7 @@
   <meta name="description" content="Responda 20 perguntas e descubra qual perfil de personalidade combina com você.">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    /* ===== Temas: claro (padrão) e escuro ===== */
     :root {
       --accent: #6c4cf5;
       --accent-2: #ff4fa3;
@@ -16,7 +17,43 @@
       --line: #e4e0f5;
       --error: #c0392b;
       --theme: #6c4cf5;
+      --card: rgba(255,255,255,.92);
+      --card-solid: #ffffff;
+      --option-bg: #ffffff;
+      --teaser-bg: linear-gradient(135deg, #fdf2ff, #eef0ff);
+      --lock-bg: rgba(255,255,255,.25);
+      --card-shadow: 0 24px 60px rgba(60, 30, 140, .14), 0 2px 0 rgba(255,255,255,.8) inset;
+      --page-bg:
+        radial-gradient(900px 500px at 10% -10%, #ffd6ec 0%, transparent 60%),
+        radial-gradient(800px 500px at 110% 10%, #cfd8ff 0%, transparent 60%),
+        linear-gradient(160deg, #f7f4ff 0%, #fdf2fa 100%);
+      --toggle-bg: #ffffff;
+      --focus: #b3a4ff;
+      color-scheme: light;
     }
+    html[data-theme="dark"] {
+      --accent: #9d86ff;
+      --accent-2: #ff6fb5;
+      --text: #f1eefc;
+      --muted: #a9a4c4;
+      --soft: #2a2544;
+      --line: #3a3458;
+      --error: #ff7b6b;
+      --card: rgba(24,21,42,.92);
+      --card-solid: #1b1831;
+      --option-bg: #211d3a;
+      --teaser-bg: linear-gradient(135deg, #2e2250, #1f2347);
+      --lock-bg: rgba(16,13,30,.45);
+      --card-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 2px 0 rgba(255,255,255,.04) inset;
+      --page-bg:
+        radial-gradient(900px 500px at 10% -10%, #3b1c4f 0%, transparent 60%),
+        radial-gradient(800px 500px at 110% 10%, #1d2456 0%, transparent 60%),
+        linear-gradient(160deg, #110e21 0%, #171329 100%);
+      --toggle-bg: #211d3a;
+      --focus: #7d6af0;
+      color-scheme: dark;
+    }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
@@ -28,24 +65,33 @@
       padding: 20px 14px;
       color: var(--text);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background:
-        radial-gradient(900px 500px at 10% -10%, #ffd6ec 0%, transparent 60%),
-        radial-gradient(800px 500px at 110% 10%, #cfd8ff 0%, transparent 60%),
-        linear-gradient(160deg, #f7f4ff 0%, #fdf2fa 100%);
+      background: var(--page-bg);
       background-attachment: fixed;
+      transition: background .3s ease, color .3s ease;
     }
+
+    .theme-toggle {
+      position: fixed; top: 14px; right: 14px; z-index: 10;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid var(--line); background: var(--toggle-bg); color: var(--text);
+      font-size: 1.2rem; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,.12);
+      display: grid; place-items: center;
+    }
+    .theme-toggle:hover { transform: scale(1.06); }
+    .theme-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
     .card {
       position: relative;
       width: 100%;
       max-width: 540px;
-      background: rgba(255,255,255,.92);
+      background: var(--card);
       backdrop-filter: blur(6px);
       border-radius: 24px;
       padding: 34px 26px;
-      box-shadow: 0 24px 60px rgba(60, 30, 140, .14), 0 2px 0 rgba(255,255,255,.8) inset;
+      box-shadow: var(--card-shadow);
       text-align: center;
       overflow: hidden;
+      transition: background .3s ease;
     }
     .card::before {
       content: "";
@@ -87,7 +133,7 @@
     .btn-main:focus-visible { outline: 3px solid #b3a4ff; outline-offset: 3px; }
     .btn-ghost {
       display: block; width: 100%; margin-top: 12px; padding: 12px 20px; border: 2px solid var(--line); border-radius: 14px;
-      background: #fff; color: var(--accent); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      background: var(--card-solid); color: var(--accent); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
     }
     .btn-ghost:hover { background: var(--soft); }
 
@@ -105,7 +151,7 @@
     .options { display: grid; gap: 10px; }
     .option {
       display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 14px;
-      border: 2px solid var(--line); border-radius: 14px; background: #fff; color: var(--text);
+      border: 2px solid var(--line); border-radius: 14px; background: var(--option-bg); color: var(--text);
       font-size: 1rem; text-align: left; cursor: pointer; font-family: inherit;
       transition: border-color .15s ease, background .15s ease, transform .12s ease;
     }
@@ -120,15 +166,15 @@
     /* Gate */
     .teaser {
       position: relative; margin: 18px 0 6px; padding: 22px 16px; border-radius: 18px;
-      background: linear-gradient(135deg, #fdf2ff, #eef0ff); overflow: hidden;
+      background: var(--teaser-bg); overflow: hidden;
     }
     .teaser .label { font-size: .85rem; color: var(--muted); }
     .teaser .blur { margin-top: 6px; font-size: 1.7rem; font-weight: 800; filter: blur(7px); user-select: none; color: var(--text); }
     .teaser .lock {
       position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: rgba(255,255,255,.25); font-size: 2.2rem;
+      background: var(--lock-bg); font-size: 2.2rem;
     }
-    .teaser .lock small { font-size: .8rem; font-weight: 700; color: var(--accent); background: #fff; padding: 4px 10px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .teaser .lock small { font-size: .8rem; font-weight: 700; color: var(--accent); background: var(--card-solid); padding: 4px 10px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
 
     .social {
       display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; margin-top: 12px;
@@ -152,8 +198,8 @@
     /* Result */
     .result-card {
       margin-top: 14px; padding: 28px 20px; border-radius: 20px;
-      background: linear-gradient(135deg, var(--theme-bg-1, #f1efff), var(--theme-bg-2, #e4e0ff));
-      border: 2px solid color-mix(in srgb, var(--theme) 25%, transparent);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--theme) 16%, var(--card-solid)), color-mix(in srgb, var(--theme) 6%, var(--card-solid)));
+      border: 2px solid color-mix(in srgb, var(--theme) 35%, transparent);
     }
     .result-emoji { font-size: 72px; line-height: 1; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; }
     @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -176,6 +222,7 @@
   </style>
 </head>
 <body>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Usar tema escuro">🌙</button>
 <main class="card">
 
   <!-- INÍCIO -->
@@ -520,6 +567,26 @@ function restart() {
 }
 
 /* ===== EVENTOS ===== */
+/* ===== TEMA ===== */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const btn = $('theme-toggle');
+  btn.textContent = t === 'dark' ? '☀️' : '🌙';
+  btn.setAttribute('aria-label', t === 'dark' ? 'Usar tema claro' : 'Usar tema escuro');
+}
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  const system = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  applyTheme(saved || system);
+}
+$('theme-toggle').onclick = () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  applyTheme(next);
+};
+initTheme();
+
 $('author').textContent = CONFIG.AUTHOR_NAME;
 $('btn-start').onclick = () => { answers = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
 $('yt-verify').onclick = verifyYouTube;
