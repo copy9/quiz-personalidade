@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Descubra sua personalidade</title>
+  <meta name="description" content="Responda 20 perguntas e descubra qual perfil de personalidade combina com você.">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --accent: #6c4cf5;
+      --accent-2: #ff4fa3;
+      --text: #1d1b2e;
+      --muted: #6b6880;
+      --soft: #f3f0ff;
+      --line: #e4e0f5;
+      --error: #c0392b;
+      --theme: #6c4cf5;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 14px;
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(900px 500px at 10% -10%, #ffd6ec 0%, transparent 60%),
+        radial-gradient(800px 500px at 110% 10%, #cfd8ff 0%, transparent 60%),
+        linear-gradient(160deg, #f7f4ff 0%, #fdf2fa 100%);
+      background-attachment: fixed;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(6px);
+      border-radius: 24px;
+      padding: 34px 26px;
+      box-shadow: 0 24px 60px rgba(60, 30, 140, .14), 0 2px 0 rgba(255,255,255,.8) inset;
+      text-align: center;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; animation: rise .4s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    h1 { font-size: 1.9rem; line-height: 1.2; margin: 6px 0 10px; letter-spacing: -.02em; }
+    h2 { font-size: 1.45rem; line-height: 1.25; margin: 6px 0 10px; }
+    .muted { color: var(--muted); }
+    .kicker {
+      display: inline-block; margin-bottom: 8px; padding: 6px 12px; border-radius: 99px;
+      background: var(--soft); color: var(--accent); font-size: .8rem; font-weight: 700; letter-spacing: .03em;
+    }
+
+    .hero-emojis { font-size: 58px; margin: 10px 0 4px; animation: float 3.2s ease-in-out infinite; }
+    .hero-emojis span { display: inline-block; }
+    .hero-emojis span:nth-child(2) { animation: float 3.2s ease-in-out .4s infinite; }
+    .hero-emojis span:nth-child(3) { animation: float 3.2s ease-in-out .8s infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .perks { list-style: none; padding: 0; margin: 20px auto 0; display: grid; gap: 8px; max-width: 360px; text-align: left; }
+    .perks li { display: flex; align-items: center; gap: 10px; font-size: .97rem; }
+    .perks li b { font-size: 1.2rem; }
+
+    .btn-main {
+      display: block; width: 100%; margin-top: 22px; padding: 16px 20px; border: none; border-radius: 14px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #fff;
+      font-size: 1.08rem; font-weight: 800; cursor: pointer; font-family: inherit;
+      box-shadow: 0 10px 24px rgba(108, 76, 245, .35);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(108, 76, 245, .42); }
+    .btn-main:active { transform: translateY(0); }
+    .btn-main:focus-visible { outline: 3px solid #b3a4ff; outline-offset: 3px; }
+    .btn-ghost {
+      display: block; width: 100%; margin-top: 12px; padding: 12px 20px; border: 2px solid var(--line); border-radius: 14px;
+      background: #fff; color: var(--accent); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-ghost:hover { background: var(--soft); }
+
+    .author { margin-top: 18px; font-size: .85rem; }
+
+    /* Quiz */
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .progress-text { font-size: .85rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .milestone { font-size: .85rem; color: var(--muted); min-height: 1.2em; }
+    .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+    .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; transition: width .45s ease; }
+    .q-num { display: inline-block; margin: 18px 0 4px; font-size: .85rem; color: var(--muted); }
+    #question { font-size: 1.3rem; margin: 0 0 14px; }
+
+    .options { display: grid; gap: 10px; }
+    .option {
+      display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 14px;
+      border: 2px solid var(--line); border-radius: 14px; background: #fff; color: var(--text);
+      font-size: 1rem; text-align: left; cursor: pointer; font-family: inherit;
+      transition: border-color .15s ease, background .15s ease, transform .12s ease;
+    }
+    .option:hover { border-color: var(--accent); background: var(--soft); transform: translateX(3px); }
+    .option:focus-visible { outline: 3px solid #b3a4ff; outline-offset: 2px; }
+    .letter {
+      flex-shrink: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+      background: var(--soft); color: var(--accent); font-weight: 800; font-size: .9rem;
+    }
+    .option:hover .letter { background: var(--accent); color: #fff; }
+
+    /* Gate */
+    .teaser {
+      position: relative; margin: 18px 0 6px; padding: 22px 16px; border-radius: 18px;
+      background: linear-gradient(135deg, #fdf2ff, #eef0ff); overflow: hidden;
+    }
+    .teaser .label { font-size: .85rem; color: var(--muted); }
+    .teaser .blur { margin-top: 6px; font-size: 1.7rem; font-weight: 800; filter: blur(7px); user-select: none; color: var(--text); }
+    .teaser .lock {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: rgba(255,255,255,.25); font-size: 2.2rem;
+    }
+    .teaser .lock small { font-size: .8rem; font-weight: 700; color: var(--accent); background: #fff; padding: 4px 10px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+    .social {
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; margin-top: 12px;
+      padding: 13px 20px; border: none; border-radius: 14px; font-size: 1.02rem; font-weight: 800; font-family: inherit;
+      text-decoration: none; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    .social svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .social:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .social:active { transform: translateY(0); }
+    .social:focus-visible { outline: 3px solid #9b8cff; outline-offset: 2px; }
+    .social:disabled { opacity: .5; cursor: default; transform: none; }
+    .social.youtube { background: #FF0000; color: #fff; box-shadow: 0 8px 20px rgba(255,0,0,.28); }
+    .social.youtube.outline { background: #fff; color: #FF0000; border: 2px solid #FF0000; box-shadow: none; }
+    .social.instagram { background: linear-gradient(45deg,#F58529 0%,#DD2A7B 50%,#8134AF 75%,#515BD4 100%); color: #fff; box-shadow: 0 8px 20px rgba(221,42,123,.3); }
+
+    .gate-note { margin: 14px 0 0; font-size: .9rem; }
+    .gate-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .msg { min-height: 1.4em; margin: 0 0 4px; font-weight: 600; }
+    .error { color: var(--error); }
+
+    /* Result */
+    .result-card {
+      margin-top: 14px; padding: 28px 20px; border-radius: 20px;
+      background: linear-gradient(135deg, var(--theme-bg-1, #f1efff), var(--theme-bg-2, #e4e0ff));
+      border: 2px solid color-mix(in srgb, var(--theme) 25%, transparent);
+    }
+    .result-emoji { font-size: 72px; line-height: 1; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    #result-title { color: var(--theme); font-size: 2rem; margin: 10px 0 8px; }
+    #result-text { line-height: 1.65; margin: 0; }
+    .share-title { margin: 22px 0 0; font-weight: 700; }
+    .btn-wa {
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 10px; padding: 14px;
+      border-radius: 14px; background: #25D366; color: #fff; font-weight: 800; font-size: 1rem; text-decoration: none; font-family: inherit;
+      box-shadow: 0 8px 20px rgba(37,211,102,.3);
+    }
+    .btn-wa svg { width: 22px; height: 22px; }
+
+    @media (max-width: 480px) {
+      .card { padding: 26px 18px; border-radius: 20px; }
+      h1 { font-size: 1.6rem; }
+      .hero-emojis { font-size: 48px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+<main class="card">
+
+  <!-- INÍCIO -->
+  <section id="s-intro" class="screen active">
+    <span class="kicker">TESTE DE PERSONALIDADE</span>
+    <div class="hero-emojis" aria-hidden="true"><span>🪞</span><span>🏛️</span><span>💗</span></div>
+    <h1>Você se conhece<br>de verdade?</h1>
+    <p class="muted">Responda 20 perguntas rápidas e descubra qual perfil define a sua personalidade.</p>
+    <ul class="perks">
+      <li><b>⏱️</b> Leva menos de 2 minutos</li>
+      <li><b>🎯</b> Resultado feito para você</li>
+      <li><b>🎁</b> Totalmente grátis</li>
+    </ul>
+    <button id="btn-start" class="btn-main">Quero descobrir meu perfil →</button>
+    <p class="author muted">Teste criado por <span id="author"></span></p>
+  </section>
+
+  <!-- PERGUNTAS -->
+  <section id="s-quiz" class="screen">
+    <div class="topbar">
+      <span class="progress-text" id="progress-text"></span>
+      <span class="milestone" id="milestone"></span>
+    </div>
+    <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+    <span class="q-num" id="q-num"></span>
+    <h2 id="question"></h2>
+    <div id="options" class="options"></div>
+  </section>
+
+  <!-- DESBLOQUEIO -->
+  <section id="s-gate" class="screen">
+    <span class="kicker">🎉 RESULTADO PRONTO</span>
+    <h2>Seu perfil já foi revelado!</h2>
+    <p class="muted">Falta um último passo para desbloquear. Leva menos de 10 segundos.</p>
+
+    <div class="teaser" aria-hidden="true">
+      <div class="label">Seu perfil é:</div>
+      <div class="blur">O ????????????</div>
+      <div class="lock"><span>🔒</span><small>Desbloqueie agora</small></div>
+    </div>
+
+    <a id="yt-follow" class="social youtube" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>
+      Inscrever-se no YouTube
+    </a>
+    <button id="yt-verify" class="social youtube outline">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+      Já me inscrevi: desbloquear
+    </button>
+
+    <a id="ig-follow" class="social instagram" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7 1.2.1 1.6.1 4.9.1s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9z"/></svg>
+      Seguir no Instagram
+    </a>
+    <p class="gate-note muted">Depois de seguir, volte para esta página.</p>
+
+    <div class="gate-box">
+      <p id="gate-msg" class="msg muted" role="status"></p>
+      <button id="btn-check" class="btn-ghost">Já voltei, ver meu resultado</button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section id="s-result" class="screen">
+    <span class="kicker">SEU RESULTADO</span>
+    <div class="result-card">
+      <div class="result-emoji" id="result-emoji" aria-hidden="true"></div>
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+    </div>
+    <p class="share-title">Descubra com quem você combina 👀</p>
+    <a id="btn-share" class="btn-wa" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.7-1.7c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c.6.3 1.1.4 1.5.5a3.6 3.6 0 0 0 1.7.1 2.8 2.8 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c0-.1-.2-.2-.4-.3z"/></svg>
+      Enviar no WhatsApp
+    </a>
+    <button id="btn-restart" class="btn-ghost">Refazer o teste</button>
+  </section>
+
+</main>
+
+<script>
+/* ===== CONFIGURAÇÃO ===== */
+const CONFIG = {
+  AUTHOR_NAME: 'Vitor Aguia',
+  // Client ID do OAuth (Google Cloud, tipo "Aplicativo da Web").
+  // Adicione o endereço do site em "Origens JavaScript autorizadas".
+  GOOGLE_CLIENT_ID: 'COLE_SEU_CLIENT_ID.apps.googleusercontent.com',
+  YOUTUBE_CHANNEL_ID: 'UCpP3QnDlCXAZLDsWUV45HzA',
+  YOUTUBE_CHANNEL_URL: 'https://www.youtube.com/@euvitoraguia',
+  INSTAGRAM_PROFILE_URL: 'https://www.instagram.com/euvitoraguia',
+  WAIT_MS: 15000,
+  DEMO_UNLOCK_YOUTUBE: false // true = libera o YouTube sem login (só para testar)
+};
+
+/* ===== PERGUNTAS =====
+   Cada opção aponta para um perfil:
+   A = Narcisista (admiração, imagem, confiança em si)
+   B = Empático (sensibilidade, cuidado com o outro)
+   C = Estoico (calma, controle sobre o que é seu)
+   D = Pragmático (resultado, eficiência, ação)
+*/
+const QUESTIONS = [
+  { q: 'Ao receber uma crítica pública, você...', o: [['Fica incomodado(a) e rebate mostrando o seu valor','A'],['Pensa em como a pessoa se sentiu ao criticar','B'],['Aceita o que é útil e deixa o resto passar','C'],['Analisa se a crítica procede e ajusta o plano','D']] },
+  { q: 'Você está em um evento e alguém tira uma foto sua. O que passa pela sua cabeça?', o: [['"Preciso pegar o meu melhor ângulo"','A'],['"Espero que todos estejam bem nessa foto"','B'],['"A foto não importa, o momento é o que vale"','C'],['"Qual é o objetivo dessa foto?"','D']] },
+  { q: 'Quando alguém próximo está triste, você...', o: [['Conta uma história em que superou algo parecido','A'],['Fica ao lado e escuta sem interromper','B'],['Lembra que a tristeza passa e que nem tudo depende de você','C'],['Pergunta o que pode ser resolvido na prática','D']] },
+  { q: 'Qual destas frases mais combina com você?', o: [['"Eu mereço ser reconhecido(a)."','A'],['"Sinto o que as pessoas sentem."','B'],['"Eu só controlo as minhas próprias reações."','C'],['"Resultado fala mais alto que palavras."','D']] },
+  { q: 'Quando alguém te elogia, você...', o: [['Agradece e sente que o elogio é mais que merecido','A'],['Desvia o foco para quem te ajudou','B'],['Agradece e segue sem se deixar abalar','C'],['Agradece e pergunta como repetir o resultado','D']] },
+  { q: 'Em um grupo de trabalho, você costuma...', o: [['Querer ser lembrado(a) como quem fez a diferença','A'],['Garantir que todo mundo se sinta ouvido','B'],['Focar no que está sob o seu controle','C'],['Cobrar prazos e entregas','D']] },
+  { q: 'Se pudesse ter um superpoder, qual escolheria?', o: [['Ser admirado(a) por qualquer pessoa que conhecer','A'],['Sentir exatamente o que os outros sentem','B'],['Ficar imune às emoções negativas','C'],['Fazer qualquer projeto acontecer em um dia','D']] },
+  { q: 'Ao escolher uma roupa para um evento importante, você...', o: [['Escolhe a que mais chama atenção','A'],['Escolhe a que deixa as pessoas à vontade','B'],['Escolhe a mais simples, roupa não define ninguém','C'],['Escolhe a mais prática e adequada ao evento','D']] },
+  { q: 'Quando você perde algo importante, você...', o: [['Sente que a perda abala a sua imagem','A'],['Sofre com profundidade e procura apoio','B'],['Aceita que aquilo está fora do seu controle e segue','C'],['Procura o que pode ser recuperado ou substituído','D']] },
+  { q: 'Qual presente você mais gostaria de ganhar?', o: [['Um reconhecimento público pelo seu trabalho','A'],['Uma conversa sincera com alguém querido','B'],['Um livro sobre autocontrole e serenidade','C'],['Algo útil que facilite a sua rotina','D']] },
+  { q: 'Quando alguém pede um favor fora da sua agenda, você...', o: [['Só ajuda se isso trouxer algum retorno ou destaque','A'],['Ajuda, mesmo que atrapalhe a sua semana','B'],['Ajuda se for justo e estiver dentro das suas possibilidades','C'],['Avalia custo e benefício antes de aceitar','D']] },
+  { q: 'Em uma discussão, você tende a...', o: [['Querer ser visto(a) como o(a) mais inteligente da sala','A'],['Procurar entender o lado do outro','B'],['Manter a calma e não entrar em provocações','C'],['Buscar a solução mais eficiente para todos','D']] },
+  { q: 'Como você reage ao sucesso de um amigo?', o: [['Pensa "por que não eu?"','A'],['Fica genuinamente feliz e celebra junto','B'],['Reconhece o esforço e segue no seu caminho','C'],['Analisa o que ele fez para replicar','D']] },
+  { q: 'Qual destas frases você mais diria?', o: [['"Eu sei exatamente o que estou fazendo."','A'],['"Como você está se sentindo com isso?"','B'],['"Isso não depende de mim, então vou seguir."','C'],['"Vamos montar um plano e executar."','D']] },
+  { q: 'Ao aprender algo novo, você...', o: [['Quer ser o(a) melhor da turma o quanto antes','A'],['Aprende junto com quem está ao lado','B'],['Pratica com paciência, sem pressa','C'],['Foca no que será útil na prática','D']] },
+  { q: 'Em uma viagem com amigos, você...', o: [['Quer escolher o lugar mais bonito para postar','A'],['Cuida para que ninguém fique de fora','B'],['Aceita os imprevistos sem reclamar','C'],['Organiza custos e roteiro','D']] },
+  { q: 'Quando recebe uma notícia ruim, você...', o: [['Pensa primeiro em como isso afeta a sua imagem','A'],['Acolhe a pessoa que te contou','B'],['Reflete sobre o que é inevitável e o que pode mudar','C'],['Pensa logo no próximo passo','D']] },
+  { q: 'Qual palavra mais descreve você?', o: [['Carismático(a)','A'],['Compreensivo(a)','B'],['Sereno(a)','C'],['Eficiente','D']] },
+  { q: 'Quando alguém discorda de você em público, você...', o: [['Não gosta e costuma mostrar por que está certo(a)','A'],['Sente que magoou a pessoa e tenta reparar','B'],['Pensa que a opinião dela não muda o que é verdadeiro','C'],['Pergunta quais dados ela tem para sustentar a ideia','D']] },
+  { q: 'Se pudesse escolher uma nova habilidade, qual seria?', o: [['Ser muito conhecido(a) por algo que faz bem','A'],['Entender o que as pessoas não dizem','B'],['Dominar a própria mente e as emoções','C'],['Dominar uma ferramenta que resolve problemas rápido','D']] }
+];
+
+/* ===== RESULTADOS E VISUAL DE CADA PERFIL ===== */
+const RESULTS = {
+  A: {
+    title: 'O Narcisista',
+    emoji: '🪞',
+    text: 'Você tem confiança de sobra e gosta de ser visto(a) pelo seu valor. Carisma e presença são seus pontos fortes. Use esse brilho a seu favor, sem esquecer que os outros também querem ser vistos.',
+    color: '#8e24aa', bg1: '#f6e9fb', bg2: '#efd9f7'
+  },
+  B: {
+    title: 'O Empático',
+    emoji: '💗',
+    text: 'Você sente o que as pessoas sentem e costuma ser colo de quem precisa. Sua sensibilidade é um presente, desde que você também cuide do seu próprio coração.',
+    color: '#00897b', bg1: '#e6f7f4', bg2: '#d3f1eb'
+  },
+  C: {
+    title: 'O Estoico',
+    emoji: '🏛️',
+    text: 'Você mantém a calma quando o mundo acelera. Sabe separar o que controla do que não controla e encara os desafios com serenidade e firmeza.',
+    color: '#546e7a', bg1: '#eef2f4', bg2: '#dfe6ea'
+  },
+  D: {
+    title: 'O Pragmático',
+    emoji: '🎯',
+    text: 'Você olha para resultados, age com objetividade e resolve problemas com eficiência. Para você, o que funciona importa mais do que o que parece bonito.',
+    color: '#1e63d6', bg1: '#eaf2ff', bg2: '#d8e7ff'
+  }
+};
+
+// Mensagens que aparecem em marcos do quiz (mantêm a pessoa engajada)
+const MILESTONES = { 1: 'Ótimo começo! 🚀', 5: 'Já está no caminho! ✨', 10: 'Metade do caminho! 🎯', 15: 'Falta pouco! 🔥', 19: 'Última pergunta! 🏁' };
+
+/* ===== ESTADO E UTILITÁRIOS ===== */
+const $ = id => document.getElementById(id);
+let answers = [], current = 0, resultKey = null, retryTimer = null, tokenClient = null;
+let ytUnlocked = sessionStorage.getItem('ytUnlocked') === '1';
+
+function show(name) {
+  ['intro','quiz','gate','result'].forEach(s => $('s-' + s).classList.toggle('active', s === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function setMsg(text, isError) {
+  $('gate-msg').textContent = text;
+  $('gate-msg').className = 'msg ' + (isError ? 'error' : 'muted');
+}
+
+/* ===== QUIZ ===== */
+function renderQuestion() {
+  const item = QUESTIONS[current];
+  const n = current + 1, total = QUESTIONS.length;
+  $('progress-text').textContent = `${n}/${total}`;
+  $('bar').style.width = ((current) / total * 100) + '%';
+  $('milestone').textContent = MILESTONES[current] || '';
+  $('q-num').textContent = `Pergunta ${n}`;
+  $('question').textContent = item.q;
+
+  const box = $('options');
+  box.replaceChildren();
+  item.o.forEach(([label, type], i) => {
+    const b = document.createElement('button');
+    b.className = 'option';
+    const letter = document.createElement('span');
+    letter.className = 'letter';
+    letter.textContent = 'ABCD'[i];
+    const text = document.createElement('span');
+    text.textContent = label;
+    b.append(letter, text);
+    b.onclick = () => choose(type);
+    box.appendChild(b);
+  });
+}
+function choose(type) {
+  answers.push(type);
+  current++;
+  if (current < QUESTIONS.length) renderQuestion();
+  else finish();
+}
+// Zera qualquer desbloqueio de testes anteriores nesta aba.
+function resetUnlock() {
+  sessionStorage.removeItem('igStart');
+  sessionStorage.removeItem('ytUnlocked');
+  ytUnlocked = false;
+  clearTimeout(retryTimer);
+}
+
+function finish() {
+  const counts = { A: 0, B: 0, C: 0, D: 0 };
+  answers.forEach(t => counts[t]++);
+  resultKey = Object.keys(counts).reduce((a, b) => counts[b] > counts[a] ? b : a);
+  resetUnlock(); // este quiz começa sempre bloqueado
+  $('yt-follow').href = CONFIG.YOUTUBE_CHANNEL_URL;
+  $('ig-follow').href = CONFIG.INSTAGRAM_PROFILE_URL;
+  show('gate');
+  setMsg(sessionStorage.getItem('igStart') ? 'Depois de seguir, volte para esta página.' : 'Escolha uma rede para desbloquear.');
+  tryShowResult();
+}
+
+/* ===== YOUTUBE: verificação via Google Identity Services (sem servidor) ===== */
+function initGoogle() {
+  if (!window.google || !google.accounts) return false;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    callback: onGoogleToken
+  });
+  return true;
+}
+
+async function onGoogleToken(resp) {
+  if (resp.error) { setMsg('Login cancelado. Tente de novo.', true); return; }
+  try {
+    const url = new URL('https://www.googleapis.com/youtube/v3/subscriptions');
+    url.searchParams.set('part', 'snippet');
+    url.searchParams.set('mine', 'true');
+    url.searchParams.set('forChannelId', CONFIG.YOUTUBE_CHANNEL_ID);
+    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + resp.access_token } });
+    if (!res.ok) throw new Error('falha');
+    const data = await res.json();
+    if (data.items && data.items.length > 0) {
+      ytUnlocked = true;
+      sessionStorage.setItem('ytUnlocked', '1');
+      setMsg('Inscrição confirmada! 🎉');
+      tryShowResult();
+    } else {
+      setMsg('Não encontramos sua inscrição no canal. Inscreva-se e tente de novo.', true);
+    }
+  } catch (e) {
+    setMsg('Não conseguimos verificar sua conta do YouTube. Tente novamente.', true);
+  }
+}
+
+function verifyYouTube() {
+  if (CONFIG.DEMO_UNLOCK_YOUTUBE) {
+    ytUnlocked = true;
+    sessionStorage.setItem('ytUnlocked', '1');
+    setMsg('Inscrição confirmada! 🎉');
+    tryShowResult();
+    return;
+  }
+  if (!tokenClient && !initGoogle()) { setMsg('Não foi possível carregar o login do Google. Verifique sua conexão.', true); return; }
+  tokenClient.requestAccessToken();
+}
+
+/* ===== INSTAGRAM: espera de 15 segundos (sem verificação) ===== */
+function startInstagramWait() {
+  if (!sessionStorage.getItem('igStart')) sessionStorage.setItem('igStart', String(Date.now()));
+  setMsg('Depois de seguir, volte para esta página. O resultado libera automaticamente.');
+}
+
+function tryShowResult() {
+  if (!resultKey || !$('s-gate').classList.contains('active')) return;
+  clearTimeout(retryTimer);
+  if (ytUnlocked) return showResult();
+  const start = Number(sessionStorage.getItem('igStart'));
+  if (start) {
+    const remaining = start + CONFIG.WAIT_MS - Date.now();
+    if (remaining <= 0) return showResult();
+    setMsg(`Quase lá! Aguarde ${Math.ceil(remaining / 1000)} segundos...`);
+    retryTimer = setTimeout(tryShowResult, remaining + 300);
+  }
+}
+
+function showResult() {
+  const r = RESULTS[resultKey];
+  const card = document.querySelector('.result-card');
+  card.style.setProperty('--theme', r.color);
+  card.style.setProperty('--theme-bg-1', r.bg1);
+  card.style.setProperty('--theme-bg-2', r.bg2);
+  $('result-emoji').textContent = r.emoji;
+  $('result-title').textContent = r.title;
+  $('result-text').textContent = r.text;
+
+  const msg = `Fiz o teste de personalidade e o meu resultado foi: ${r.title} ${r.emoji}. Faça você também: ${location.href}`;
+  $('btn-share').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+
+  show('result');
+}
+
+function restart() {
+  answers = []; current = 0; resultKey = null;
+  sessionStorage.removeItem('igStart');
+  sessionStorage.removeItem('ytUnlocked');
+  ytUnlocked = false;
+  show('intro');
+}
+
+/* ===== EVENTOS ===== */
+$('author').textContent = CONFIG.AUTHOR_NAME;
+$('btn-start').onclick = () => { answers = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
+$('yt-verify').onclick = verifyYouTube;
+$('ig-follow').onclick = startInstagramWait;
+$('btn-check').onclick = tryShowResult;
+$('btn-restart').onclick = restart;
+window.addEventListener('focus', tryShowResult);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tryShowResult(); });
+window.addEventListener('load', initGoogle);
+</script>
+</body>
+</html>
