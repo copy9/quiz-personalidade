@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Descubra sua personalidade</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <section id="screen-intro" class="screen active">
+      <h1>Descubra sua personalidade</h1>
+      <p class="muted">Responda 20 perguntas rápidas e veja qual perfil combina com você.</p>
+      <button id="btn-start" class="btn primary">Começar</button>
+    </section>
+
+    <section id="screen-quiz" class="screen">
+      <p class="progress" id="progress"></p>
+      <h2 id="question-text"></h2>
+      <div id="options" class="options"></div>
+    </section>
+
+    <section id="screen-gate" class="screen">
+      <h2>Seu resultado está pronto</h2>
+      <p class="muted">Siga uma das redes abaixo para ver o resultado.</p>
+      <div id="platforms" class="platforms"></div>
+      <div class="verify-box">
+        <p id="gate-msg" class="muted" role="status"></p>
+        <button id="btn-check" class="btn">Já voltei, ver resultado</button>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen">
+      <p class="muted">Seu perfil é</p>
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+      <button id="btn-restart" class="btn">Refazer o quiz</button>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

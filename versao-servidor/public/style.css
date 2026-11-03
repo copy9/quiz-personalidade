@@ -1,0 +1,95 @@
+:root {
+  --bg: #f6f3ff;
+  --card: #ffffff;
+  --text: #1d1b2e;
+  --muted: #6b6880;
+  --accent: #6c4cf5;
+  --accent-soft: #ece8ff;
+  --error: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 10px 30px rgba(40, 20, 100, 0.08);
+  text-align: center;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+h1 { font-size: 1.6rem; margin: 0 0 8px; }
+h2 { font-size: 1.3rem; margin: 8px 0 12px; }
+.muted { color: var(--muted); }
+.progress { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
+
+.btn {
+  display: inline-block;
+  padding: 12px 20px;
+  margin-top: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { background: var(--accent-soft); }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:hover { background: #5a3ce0; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.options { display: grid; gap: 10px; margin-top: 16px; }
+.option {
+  padding: 14px;
+  border: 2px solid #e4e0f5;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+}
+.option:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+.platforms { display: grid; gap: 10px; margin-top: 16px; }
+.platforms .btn { margin-top: 0; }
+
+.verify-box {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #ece9f7;
+}
+.verify-box p { margin: 0; }
+
+.handle-input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 2px solid #e4e0f5;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.error { color: var(--error); font-size: 0.95rem; min-height: 1.2em; margin-top: 10px; }
+
+#result-title { color: var(--accent); font-size: 1.8rem; }
+#result-text { line-height: 1.6; }

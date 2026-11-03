@@ -1,0 +1,16 @@
+{
+  "name": "quiz-personalidade",
+  "version": "1.0.0",
+  "description": "Quiz de personalidade com resultado desbloqueado após seguir uma rede social",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:dev": "DEV_MOCK_VERIFY=1 node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
