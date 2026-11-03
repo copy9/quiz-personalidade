@@ -203,6 +203,22 @@
     html[data-theme="light"] #result-title { color: var(--gold-deep); }
     .result-body p { font-size: 1.15rem; line-height: 1.7; margin: 0 0 14px; }
     .result-body p:last-child { margin-bottom: 0; }
+    .field { display: block; text-align: left; margin-top: 26px; }
+    .field span { display: block; font-size: .95rem; color: var(--muted); margin-bottom: 8px; }
+    .field input {
+      width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--line);
+      background: var(--card-2); color: var(--text); font-size: 1.1rem; font-family: inherit;
+    }
+    .field input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .btn-main:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .sign { margin-top: 22px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--card-2); text-align: left; }
+    .sign-head b { display: block; font-size: 1.5rem; color: var(--gold-2); }
+    html[data-theme="light"] .sign-head b { color: var(--gold-deep); }
+    .sign-head span { display: block; font-size: .95rem; color: var(--muted); margin-top: 2px; }
+    .chips { list-style: none; padding: 0; margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chips li { padding: 6px 12px; border: 1px solid var(--gold-deep); border-radius: 99px; font-size: .95rem; }
+    .sign p { margin: 0; font-size: 1.08rem; line-height: 1.6; }
+    .sign .disclaimer { margin-top: 12px; font-size: .85rem; color: var(--muted); }
     .picks { margin-top: 22px; text-align: left; }
     .picks b { display: block; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-2); margin-bottom: 10px; }
     html[data-theme="light"] .picks b { color: var(--gold-deep); }
@@ -253,7 +269,12 @@
       <li>Resultado com definição e reflexão</li>
       <li>Totalmente grátis</li>
     </ul>
-    <button id="btn-start" class="btn-main">Quero descobrir meu perfil →</button>
+    <label class="field">
+      <span>Sua data de nascimento (para o seu signo)</span>
+      <input type="date" id="birth" min="1900-01-01" required>
+    </label>
+    <p id="birth-msg" class="msg error" role="alert"></p>
+    <button id="btn-start" class="btn-main" disabled>Quero descobrir meu perfil →</button>
     <p class="author muted">Teste criado por <span id="author"></span></p>
   </section>
 
@@ -309,6 +330,15 @@
       <div class="result-kicker" id="result-kicker"></div>
       <h2 id="result-title"></h2>
       <div class="result-body" id="result-body"></div>
+      <div class="sign">
+        <div class="sign-head">
+          <b id="sign-name"></b>
+          <span id="sign-meta"></span>
+        </div>
+        <ul class="chips" id="sign-traits"></ul>
+        <p id="sign-text"></p>
+        <p class="disclaimer">Leitura astrológica, para entretenimento. Não tem base científica.</p>
+      </div>
       <div class="picks">
         <b>Suas respostas que mais definiram o seu perfil</b>
         <ul id="result-picks"></ul>
@@ -435,6 +465,60 @@ function setMsg(text, isError) {
   $('gate-msg').textContent = text;
   $('gate-msg').className = 'msg ' + (isError ? 'error' : 'muted');
 }
+
+/* ===== SIGNO ===== */
+// Início de cada signo (mês, dia). Vale o último início que já passou no ano.
+const SIGN_STARTS = [
+  [1, 1, 'Capricórnio'], [1, 20, 'Aquário'], [2, 19, 'Peixes'], [3, 21, 'Áries'],
+  [4, 20, 'Touro'], [5, 21, 'Gêmeos'], [6, 21, 'Câncer'], [7, 23, 'Leão'],
+  [8, 23, 'Virgem'], [9, 23, 'Libra'], [10, 23, 'Escorpião'], [11, 22, 'Sagitário'], [12, 22, 'Capricórnio']
+];
+const SIGNS = {
+  'Áries': { period: '21/3 a 19/4', element: 'Fogo', traits: ['Iniciativa', 'Coragem', 'Franqueza', 'Impaciência'],
+    text: 'Áries costuma agir antes de pensar demais e tem energia forte para começar coisas novas. O desafio apontado pela leitura é aprender a esperar o momento certo e ouvir antes de decidir.' },
+  'Touro': { period: '20/4 a 20/5', element: 'Terra', traits: ['Constância', 'Paciência', 'Sensorialidade', 'Teimosia'],
+    text: 'Touro valoriza estabilidade e o que pode ser sentido e construído. A força está na constância; o cuidado é não se prender ao que é confortável quando chega a hora de mudar.' },
+  'Gêmeos': { period: '21/5 a 20/6', element: 'Ar', traits: ['Curiosidade', 'Comunicação', 'Adaptabilidade', 'Inquietação'],
+    text: 'Gêmeos pensa rápido, conecta ideias e se adapta a ambientes diferentes. O desafio é aprofundar o que começa e sustentar a atenção por mais tempo.' },
+  'Câncer': { period: '21/6 a 22/7', element: 'Água', traits: ['Afeto', 'Proteção', 'Memória emocional', 'Intuição'],
+    text: 'Câncer se conecta com a família e com o lar e leva a sério o cuidado com quem ama. O desafio é não se fechar na defesa quando se sente vulnerável.' },
+  'Leão': { period: '23/7 a 22/8', element: 'Fogo', traits: ['Generosidade', 'Presença', 'Orgulho', 'Liderança'],
+    text: 'Leão gosta de expressar o que é e de inspirar os outros. A força está na generosidade; o desafio é não depender de aplausos para se sentir valorizado.' },
+  'Virgem': { period: '23/8 a 22/9', element: 'Terra', traits: ['Organização', 'Análise', 'Autocrítica', 'Dedicação'],
+    text: 'Virgem observa detalhes e busca precisão. O desafio é não transformar a perfeição em cobrança constante, consigo e com os outros.' },
+  'Libra': { period: '23/9 a 22/10', element: 'Ar', traits: ['Equilíbrio', 'Diplomacia', 'Senso estético', 'Indecisão'],
+    text: 'Libra busca harmonia e justiça nas relações. O desafio é decidir sem depender da aprovação de todos, mesmo quando isso gera algum desconforto.' },
+  'Escorpião': { period: '23/10 a 21/11', element: 'Água', traits: ['Intensidade', 'Profundidade', 'Lealdade', 'Desconfiança'],
+    text: 'Escorpião vai fundo nas emoções e nas questões que importam. A força está na lealdade; o desafio é confiar sem controlar cada passo.' },
+  'Sagitário': { period: '22/11 a 21/12', element: 'Fogo', traits: ['Otimismo', 'Liberdade', 'Franqueza', 'Dispersão'],
+    text: 'Sagitário busca sentido, experiências e liberdade. O desafio é sustentar o compromisso com as escolhas feitas, sem mudar de direção a cada novidade.' },
+  'Capricórnio': { period: '22/12 a 19/1', element: 'Terra', traits: ['Disciplina', 'Responsabilidade', 'Ambição', 'Reserva'],
+    text: 'Capricórnio planeja a longo prazo e assume responsabilidades. A força está na disciplina; o desafio é se permitir descansar e demonstrar afeto sem esperar o momento perfeito.' },
+  'Aquário': { period: '20/1 a 18/2', element: 'Ar', traits: ['Independência', 'Originalidade', 'Visão coletiva', 'Distanciamento'],
+    text: 'Aquário pensa de forma original e se preocupa com o coletivo. O desafio é não se afastar emocionalmente das pessoas em nome da própria independência.' },
+  'Peixes': { period: '19/2 a 20/3', element: 'Água', traits: ['Empatia', 'Imaginação', 'Sensibilidade', 'Dispersão'],
+    text: 'Peixes percebe o mundo pela emoção e pela imaginação. A força está na sensibilidade; o desafio é manter limites para não se perder no que sente pelos outros.' }
+};
+function signFromDate(iso) {
+  const [, m, d] = iso.split('-').map(Number);
+  let name = 'Capricórnio';
+  SIGN_STARTS.forEach(([sm, sd, n]) => { if (m > sm || (m === sm && d >= sd)) name = n; });
+  return name;
+}
+function isValidBirth(iso) {
+  if (!iso) return false;
+  const t = new Date(iso + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return !isNaN(t) && iso >= '1900-01-01' && t <= today;
+}
+function updateStartButton() {
+  const v = $('birth').value;
+  const ok = isValidBirth(v);
+  $('btn-start').disabled = !ok;
+  $('birth-msg').textContent = v && !ok ? 'Informe uma data válida, a partir de 1900.' : '';
+}
+let birthDate = '';
+$('birth').addEventListener('input', updateStartButton);
 
 /* ===== QUIZ ===== */
 function renderQuestion() {
@@ -589,6 +673,15 @@ function tryShowResult() {
 
 function showResult() {
   const r = RESULTS[resultKey];
+  const sign = signFromDate(birthDate);
+  const info = SIGNS[sign];
+  $('sign-name').textContent = sign;
+  $('sign-meta').textContent = `${info.period} · Elemento ${info.element}`;
+  const traits = $('sign-traits');
+  traits.replaceChildren();
+  info.traits.forEach(t => { const li = document.createElement('li'); li.textContent = t; traits.appendChild(li); });
+  $('sign-text').textContent = info.text;
+
   const total = picks.filter(p => p.type === resultKey).length;
   $('result-kicker').textContent = `Você escolheu este perfil em ${total} de ${QUESTIONS.length} perguntas`;
 
@@ -653,7 +746,7 @@ initTheme();
 
 /* ===== EVENTOS ===== */
 $('author').textContent = CONFIG.AUTHOR_NAME;
-$('btn-start').onclick = () => { answers = []; picks = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
+$('btn-start').onclick = () => { if (!isValidBirth($('birth').value)) return; birthDate = $('birth').value; answers = []; picks = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
 $('yt-verify').onclick = verifyYouTube;
 $('ig-follow').onclick = startInstagramWait;
 $('btn-check').onclick = tryShowResult;
