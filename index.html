@@ -203,6 +203,13 @@
     html[data-theme="light"] #result-title { color: var(--gold-deep); }
     .result-body p { font-size: 1.15rem; line-height: 1.7; margin: 0 0 14px; }
     .result-body p:last-child { margin-bottom: 0; }
+    .picks { margin-top: 22px; text-align: left; }
+    .picks b { display: block; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-2); margin-bottom: 10px; }
+    html[data-theme="light"] .picks b { color: var(--gold-deep); }
+    .picks ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .picks li { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+    .pick-q { display: block; font-size: .92rem; color: var(--muted); }
+    .pick-a { display: block; font-size: 1.08rem; font-weight: 700; margin-top: 4px; }
     .reflect {
       margin-top: 22px; padding: 18px 20px; border-left: 3px solid var(--gold); background: var(--card);
       border-radius: 0 12px 12px 0;
@@ -302,6 +309,10 @@
       <div class="result-kicker" id="result-kicker"></div>
       <h2 id="result-title"></h2>
       <div class="result-body" id="result-body"></div>
+      <div class="picks">
+        <b>Suas respostas que mais definiram o seu perfil</b>
+        <ul id="result-picks"></ul>
+      </div>
       <div class="reflect">
         <b>Para refletir</b>
         <p id="result-reflect"></p>
@@ -368,7 +379,7 @@ const QUESTIONS = [
 const RESULTS = {
   A: {
     title: 'O Narcisista',
-    kicker: 'Traço dominante: necessidade de admiração',
+    kicker: '',
     body: [
       'Você se vê com valor alto e espera que os outros reconheçam isso. Tende a buscar destaque, a querer ser notado e a sentir desconforto quando é ignorado ou comparado de forma desfavorável.',
       'Sua confiança costuma ser um recurso real: você se apresenta bem, assume posições e não se abala facilmente com uma crítica. O ponto fraco aparece quando a sua autoestima depende da opinião alheia. Nesse caso, uma crítica deixa de ser informação e vira ameaça, e a conversa passa a girar em torno de você.',
@@ -378,7 +389,7 @@ const RESULTS = {
   },
   B: {
     title: 'O Empático',
-    kicker: 'Traço dominante: sensibilidade ao outro',
+    kicker: '',
     body: [
       'Você percebe rapidamente como as outras pessoas estão se sentindo, mesmo quando elas não dizem. Costuma ajustar o tom, notar o que está por trás de uma fala e se preocupar em não ferir ninguém.',
       'Essa sensibilidade é um recurso forte para ouvir, acolher e criar confiança. O ponto de atenção é o excesso: você pode absorver o sofrimento alheio, evitar conflitos necessários e colocar as necessidades dos outros acima das suas com frequência.',
@@ -388,7 +399,7 @@ const RESULTS = {
   },
   C: {
     title: 'O Estoico',
-    kicker: 'Traço dominante: controle e serenidade',
+    kicker: '',
     body: [
       'Você tende a separar com clareza o que depende de você do que não depende. Diante de problemas, foca primeiro no que pode mudar e aceita com mais facilidade o que está fora do seu alcance.',
       'Mantém a calma sob pressão e não costuma reagir por impulso. Essa firmeza ajuda em decisões difíceis e em situações de crise. O risco é usar a serenidade como fuga: evitar conversas desconfortáveis, adiar sentimentos ou se afastar para não lidar com o problema.',
@@ -398,7 +409,7 @@ const RESULTS = {
   },
   D: {
     title: 'O Pragmático',
-    kicker: 'Traço dominante: foco em resultado',
+    kicker: '',
     body: [
       'Você avalia situações pelo que funciona. Quer saber o objetivo, o caminho e o custo, e tende a ajustar o método quando algo não dá certo, sem se apegar à forma original.',
       'Costuma ser objetivo, eficiente e confiável sob pressão. Sabe priorizar e transforma decisões em ação. O ponto de atenção é tratar como secundário o que não se mede, como valores, vínculos e sentido. Pessoas próximas podem sentir que a relação está sendo tratada como projeto.',
@@ -413,7 +424,7 @@ const MILESTONES = { 1: 'Ótimo começo!', 5: 'Já está no caminho!', 10: 'Meta
 
 /* ===== ESTADO E UTILITÁRIOS ===== */
 const $ = id => document.getElementById(id);
-let answers = [], current = 0, resultKey = null, retryTimer = null, tokenClient = null;
+let answers = [], picks = [], current = 0, resultKey = null, retryTimer = null, tokenClient = null;
 let ytUnlocked = sessionStorage.getItem('ytUnlocked') === '1';
 
 function show(name) {
@@ -446,12 +457,13 @@ function renderQuestion() {
     const text = document.createElement('span');
     text.textContent = label;
     b.append(letter, text);
-    b.onclick = () => choose(type);
+    b.onclick = () => choose(type, label, item.q);
     box.appendChild(b);
   });
 }
-function choose(type) {
+function choose(type, label, question) {
   answers.push(type);
+  picks.push({ type, label, question });
   current++;
   if (current < QUESTIONS.length) renderQuestion();
   else finish();
@@ -577,7 +589,26 @@ function tryShowResult() {
 
 function showResult() {
   const r = RESULTS[resultKey];
-  $('result-kicker').textContent = r.kicker;
+  const total = picks.filter(p => p.type === resultKey).length;
+  $('result-kicker').textContent = `Você escolheu este perfil em ${total} de ${QUESTIONS.length} perguntas`;
+
+  // Mostra até 3 respostas da própria pessoa que apontaram para esse perfil.
+  const mine = picks.filter(p => p.type === resultKey);
+  const step = Math.max(1, Math.floor(mine.length / 3));
+  const chosen = mine.filter((_, i) => i % step === 0).slice(0, 3);
+  const list = $('result-picks');
+  list.replaceChildren();
+  chosen.forEach(p => {
+    const li = document.createElement('li');
+    const q = document.createElement('span');
+    q.className = 'pick-q';
+    q.textContent = p.question;
+    const a = document.createElement('span');
+    a.className = 'pick-a';
+    a.textContent = p.label;
+    li.append(q, a);
+    list.appendChild(li);
+  });
   $('result-title').textContent = r.title;
 
   const body = $('result-body');
@@ -596,7 +627,7 @@ function showResult() {
 }
 
 function restart() {
-  answers = []; current = 0; resultKey = null;
+  answers = []; picks = []; current = 0; resultKey = null;
   resetUnlock();
   show('intro');
 }
@@ -622,7 +653,7 @@ initTheme();
 
 /* ===== EVENTOS ===== */
 $('author').textContent = CONFIG.AUTHOR_NAME;
-$('btn-start').onclick = () => { answers = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
+$('btn-start').onclick = () => { answers = []; picks = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
 $('yt-verify').onclick = verifyYouTube;
 $('ig-follow').onclick = startInstagramWait;
 $('btn-check').onclick = tryShowResult;
