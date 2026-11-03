@@ -402,19 +402,33 @@ function initGoogle() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CONFIG.GOOGLE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/youtube.readonly',
-    callback: onGoogleToken
+    callback: onGoogleToken,
+    error_callback: onGoogleError
   });
   return true;
 }
 
-async function onGoogleToken(resp) {
-  if (resp.error) { setMsg('Login cancelado. Tente de novo.', true); return; }
+// Guarda o token do Google nesta aba até ele expirar, para não abrir a janela de login a cada clique.
+function saveYouTubeToken(resp) {
+  const lifetime = (Number(resp.expires_in) || 3600) - 60;
+  sessionStorage.setItem('ytToken', JSON.stringify({ token: resp.access_token, exp: Date.now() + lifetime * 1000 }));
+}
+function cachedYouTubeToken() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('ytToken') || 'null');
+    return saved && saved.exp > Date.now() ? saved.token : null;
+  } catch (e) { return null; }
+}
+
+// Confere a inscrição com um token já obtido. Desbloqueia se estiver inscrito.
+async function checkYouTubeSubscription(accessToken) {
   try {
     const url = new URL('https://www.googleapis.com/youtube/v3/subscriptions');
     url.searchParams.set('part', 'snippet');
     url.searchParams.set('mine', 'true');
     url.searchParams.set('forChannelId', CONFIG.YOUTUBE_CHANNEL_ID);
-    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + resp.access_token } });
+    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+    if (res.status === 401) { sessionStorage.removeItem('ytToken'); setMsg('Sua sessão do Google expirou. Clique de novo para verificar.', true); return; }
     if (!res.ok) throw new Error('falha');
     const data = await res.json();
     if (data.items && data.items.length > 0) {
@@ -430,6 +444,21 @@ async function onGoogleToken(resp) {
   }
 }
 
+// Retorno da janela de login do Google.
+function onGoogleToken(resp) {
+  if (resp.error) { setMsg('Login cancelado. Tente de novo.', true); return; }
+  saveYouTubeToken(resp);
+  checkYouTubeSubscription(resp.access_token);
+}
+
+function onGoogleError(err) {
+  if (err && err.type === 'popup_failed_to_open') {
+    setMsg('O navegador bloqueou a janela do Google. Permita pop-ups deste site e tente de novo.', true);
+  } else {
+    setMsg('Login cancelado. Tente de novo.', true);
+  }
+}
+
 function verifyYouTube() {
   if (CONFIG.DEMO_UNLOCK_YOUTUBE) {
     ytUnlocked = true;
@@ -438,8 +467,13 @@ function verifyYouTube() {
     tryShowResult();
     return;
   }
+  // Já logado nesta aba: verifica direto, sem nova janela do Google.
+  const token = cachedYouTubeToken();
+  if (token) { setMsg('Verificando sua inscrição...'); checkYouTubeSubscription(token); return; }
+
   if (!tokenClient && !initGoogle()) { setMsg('Não foi possível carregar o login do Google. Verifique sua conexão.', true); return; }
-  tokenClient.requestAccessToken();
+  setMsg('Confirme o login na janela do Google.');
+  tokenClient.requestAccessToken({ prompt: '' });
 }
 
 /* ===== INSTAGRAM: espera de 15 segundos (sem verificação) ===== */
