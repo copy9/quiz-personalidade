@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#0b0a09">
   <title>Descubra sua personalidade</title>
   <meta name="description" content="Responda 20 perguntas e descubra qual perfil de personalidade combina com você.">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* ===== Paleta inspirada na landing: preto quente + dourado ===== */
     :root {
@@ -184,8 +183,6 @@
     .social:active { transform: translateY(0); }
     .social:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
     .social:disabled { opacity: .5; cursor: default; transform: none; }
-    .social.youtube { background: #FF0000; color: #fff; box-shadow: 0 8px 20px rgba(255,0,0,.28); }
-    .social.youtube.outline { background: #fff; color: #FF0000; border: 2px solid #FF0000; box-shadow: none; }
     .social.instagram { background: linear-gradient(45deg,#F58529 0%,#DD2A7B 50%,#8134AF 75%,#515BD4 100%); color: #fff; box-shadow: 0 8px 20px rgba(221,42,123,.3); }
 
     .gate-note { margin: 16px 0 0; font-size: 1rem; }
@@ -322,14 +319,6 @@
       <div class="lock"><small>Conteúdo bloqueado</small></div>
     </div>
 
-    <a id="yt-follow" class="social youtube" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>
-      Inscrever-se no YouTube
-    </a>
-    <button id="yt-verify" class="social youtube outline">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
-      Já me inscrevi: desbloquear
-    </button>
 
     <a id="ig-follow" class="social instagram" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7 1.2.1 1.6.1 4.9.1s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9z"/></svg>
@@ -394,15 +383,10 @@
 /* ===== CONFIGURAÇÃO ===== */
 const CONFIG = {
   AUTHOR_NAME: 'Vitor Aguia',
-  // Client ID do OAuth (Google Cloud, tipo "Aplicativo da Web").
-  // Adicione o endereço do site em "Origens JavaScript autorizadas".
-  GOOGLE_CLIENT_ID: 'COLE_SEU_CLIENT_ID.apps.googleusercontent.com',
-  YOUTUBE_CHANNEL_ID: 'UCpP3QnDlCXAZLDsWUV45HzA',
-  YOUTUBE_CHANNEL_URL: 'https://www.youtube.com/@euvitoraguia',
   INSTAGRAM_PROFILE_URL: 'https://www.instagram.com/euvitoraguia',
-  WAIT_MS: 15000,
-  DEMO_UNLOCK_YOUTUBE: false // true = libera o YouTube sem login (só para testar)
+  WAIT_MS: 15000 // tempo de espera após clicar no Instagram
 };
+
 
 /* ===== PERGUNTAS =====
    Cada opção aponta para um perfil:
@@ -507,8 +491,7 @@ const MILESTONES = { 1: 'Ótimo começo!', 5: 'Já está no caminho!', 10: 'Meta
 
 /* ===== ESTADO E UTILITÁRIOS ===== */
 const $ = id => document.getElementById(id);
-let answers = [], picks = [], current = 0, resultKey = null, retryTimer = null, tokenClient = null;
-let ytUnlocked = sessionStorage.getItem('ytUnlocked') === '1';
+let answers = [], picks = [], current = 0, resultKey = null, retryTimer = null;
 
 function show(name) {
   ['intro','quiz','gate','result'].forEach(s => $('s-' + s).classList.toggle('active', s === name));
@@ -608,8 +591,6 @@ function choose(type, label, question) {
 // Zera qualquer desbloqueio de testes anteriores nesta aba.
 function resetUnlock() {
   sessionStorage.removeItem('igStart');
-  sessionStorage.removeItem('ytUnlocked');
-  ytUnlocked = false;
   clearTimeout(retryTimer);
 }
 
@@ -618,91 +599,10 @@ function finish() {
   answers.forEach(t => counts[t]++);
   resultKey = Object.keys(counts).reduce((a, b) => counts[b] > counts[a] ? b : a);
   resetUnlock(); // este quiz começa sempre bloqueado
-  $('yt-follow').href = CONFIG.YOUTUBE_CHANNEL_URL;
   $('ig-follow').href = CONFIG.INSTAGRAM_PROFILE_URL;
   show('gate');
-  setMsg(sessionStorage.getItem('igStart') ? 'Depois de seguir, volte para esta página.' : 'Escolha uma rede para desbloquear.');
+  setMsg(sessionStorage.getItem('igStart') ? 'Depois de seguir, volte para esta página.' : 'Siga o perfil no Instagram para desbloquear.');
   tryShowResult();
-}
-
-/* ===== YOUTUBE: verificação via Google Identity Services (sem servidor) ===== */
-function initGoogle() {
-  if (!window.google || !google.accounts) return false;
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
-    callback: onGoogleToken,
-    error_callback: onGoogleError
-  });
-  return true;
-}
-
-// Guarda o token do Google nesta aba até ele expirar, para não abrir a janela de login a cada clique.
-function saveYouTubeToken(resp) {
-  const lifetime = (Number(resp.expires_in) || 3600) - 60;
-  sessionStorage.setItem('ytToken', JSON.stringify({ token: resp.access_token, exp: Date.now() + lifetime * 1000 }));
-}
-function cachedYouTubeToken() {
-  try {
-    const saved = JSON.parse(sessionStorage.getItem('ytToken') || 'null');
-    return saved && saved.exp > Date.now() ? saved.token : null;
-  } catch (e) { return null; }
-}
-
-// Confere a inscrição com um token já obtido. Desbloqueia se estiver inscrito.
-async function checkYouTubeSubscription(accessToken) {
-  try {
-    const url = new URL('https://www.googleapis.com/youtube/v3/subscriptions');
-    url.searchParams.set('part', 'snippet');
-    url.searchParams.set('mine', 'true');
-    url.searchParams.set('forChannelId', CONFIG.YOUTUBE_CHANNEL_ID);
-    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
-    if (res.status === 401) { sessionStorage.removeItem('ytToken'); setMsg('Sua sessão do Google expirou. Clique de novo para verificar.', true); return; }
-    if (!res.ok) throw new Error('falha');
-    const data = await res.json();
-    if (data.items && data.items.length > 0) {
-      ytUnlocked = true;
-      sessionStorage.setItem('ytUnlocked', '1');
-      setMsg('Inscrição confirmada!');
-      tryShowResult();
-    } else {
-      setMsg('Não encontramos sua inscrição no canal. Inscreva-se e tente de novo.', true);
-    }
-  } catch (e) {
-    setMsg('Não conseguimos verificar sua conta do YouTube. Tente novamente.', true);
-  }
-}
-
-// Retorno da janela de login do Google.
-function onGoogleToken(resp) {
-  if (resp.error) { setMsg('Login cancelado. Tente de novo.', true); return; }
-  saveYouTubeToken(resp);
-  checkYouTubeSubscription(resp.access_token);
-}
-
-function onGoogleError(err) {
-  if (err && err.type === 'popup_failed_to_open') {
-    setMsg('O navegador bloqueou a janela do Google. Permita pop-ups deste site e tente de novo.', true);
-  } else {
-    setMsg('Login cancelado. Tente de novo.', true);
-  }
-}
-
-function verifyYouTube() {
-  if (CONFIG.DEMO_UNLOCK_YOUTUBE) {
-    ytUnlocked = true;
-    sessionStorage.setItem('ytUnlocked', '1');
-    setMsg('Inscrição confirmada!');
-    tryShowResult();
-    return;
-  }
-  // Já logado nesta aba: verifica direto, sem nova janela do Google.
-  const token = cachedYouTubeToken();
-  if (token) { setMsg('Verificando sua inscrição...'); checkYouTubeSubscription(token); return; }
-
-  if (!tokenClient && !initGoogle()) { setMsg('Não foi possível carregar o login do Google. Verifique sua conexão.', true); return; }
-  setMsg('Confirme o login na janela do Google.');
-  tokenClient.requestAccessToken({ prompt: '' });
 }
 
 /* ===== INSTAGRAM: espera de 15 segundos (sem verificação) ===== */
@@ -714,7 +614,6 @@ function startInstagramWait() {
 function tryShowResult() {
   if (!resultKey || !$('s-gate').classList.contains('active')) return;
   clearTimeout(retryTimer);
-  if (ytUnlocked) return showResult();
   const start = Number(sessionStorage.getItem('igStart'));
   if (start) {
     const remaining = start + CONFIG.WAIT_MS - Date.now();
@@ -819,13 +718,11 @@ initTheme();
 /* ===== EVENTOS ===== */
 $('author').textContent = CONFIG.AUTHOR_NAME;
 $('btn-start').onclick = () => { if (!isValidBirth($('birth').value)) return; birthDate = $('birth').value; answers = []; picks = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
-$('yt-verify').onclick = verifyYouTube;
 $('ig-follow').onclick = startInstagramWait;
 $('btn-check').onclick = tryShowResult;
 $('btn-restart').onclick = restart;
 window.addEventListener('focus', tryShowResult);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tryShowResult(); });
-window.addEventListener('load', initGoogle);
 </script>
 </body>
 </html>
