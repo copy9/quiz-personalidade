@@ -3,68 +3,67 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0a09">
   <title>Descubra sua personalidade</title>
   <meta name="description" content="Responda 20 perguntas e descubra qual perfil de personalidade combina com você.">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* ===== Temas: claro (padrão) e escuro ===== */
+    /* ===== Paleta inspirada na landing: preto quente + dourado ===== */
     :root {
-      --accent: #6c4cf5;
-      --accent-2: #ff4fa3;
-      --text: #1d1b2e;
-      --muted: #6b6880;
-      --soft: #f3f0ff;
-      --line: #e4e0f5;
-      --error: #c0392b;
-      --theme: #6c4cf5;
-      --card: rgba(255,255,255,.92);
-      --card-solid: #ffffff;
-      --option-bg: #ffffff;
-      --teaser-bg: linear-gradient(135deg, #fdf2ff, #eef0ff);
-      --lock-bg: rgba(255,255,255,.25);
-      --card-shadow: 0 24px 60px rgba(60, 30, 140, .14), 0 2px 0 rgba(255,255,255,.8) inset;
+      --bg: #0b0a09;
+      --card: #141210;
+      --card-2: #1c1915;
+      --text: #f5efe3;
+      --muted: #a79e8c;
+      --gold: #d4af37;
+      --gold-2: #f1d27a;
+      --gold-deep: #9c7a22;
+      --line: #2e2a24;
+      --error: #e8806f;
+      --on-gold: #0b0a09;
+      --focus: #f1d27a;
       --page-bg:
-        radial-gradient(900px 500px at 10% -10%, #ffd6ec 0%, transparent 60%),
-        radial-gradient(800px 500px at 110% 10%, #cfd8ff 0%, transparent 60%),
-        linear-gradient(160deg, #f7f4ff 0%, #fdf2fa 100%);
-      --toggle-bg: #ffffff;
-      --focus: #b3a4ff;
-      color-scheme: light;
-    }
-    html[data-theme="dark"] {
-      --accent: #9d86ff;
-      --accent-2: #ff6fb5;
-      --text: #f1eefc;
-      --muted: #a9a4c4;
-      --soft: #2a2544;
-      --line: #3a3458;
-      --error: #ff7b6b;
-      --card: rgba(24,21,42,.92);
-      --card-solid: #1b1831;
-      --option-bg: #211d3a;
-      --teaser-bg: linear-gradient(135deg, #2e2250, #1f2347);
-      --lock-bg: rgba(16,13,30,.45);
-      --card-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 2px 0 rgba(255,255,255,.04) inset;
-      --page-bg:
-        radial-gradient(900px 500px at 10% -10%, #3b1c4f 0%, transparent 60%),
-        radial-gradient(800px 500px at 110% 10%, #1d2456 0%, transparent 60%),
-        linear-gradient(160deg, #110e21 0%, #171329 100%);
-      --toggle-bg: #211d3a;
-      --focus: #7d6af0;
+        radial-gradient(900px 520px at 15% -10%, rgba(212,175,55,.14), transparent 60%),
+        radial-gradient(700px 480px at 100% 110%, rgba(212,175,55,.08), transparent 60%),
+        #0b0a09;
+      --card-shadow: 0 24px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
+      --accent: var(--gold);
+      --accent-2: var(--gold-2);
+      --toggle-bg: #1c1915;
       color-scheme: dark;
+    }
+    /* Tema claro opcional, com o mesmo dourado em tom mais escuro para contraste */
+    html[data-theme="light"] {
+      --bg: #f7f3ea;
+      --card: #ffffff;
+      --card-2: #fbf8f1;
+      --text: #0b0a09;
+      --muted: #6e6656;
+      --gold: #9c7a22;
+      --gold-2: #c9a24a;
+      --gold-deep: #7a5e18;
+      --line: #e6dfcf;
+      --error: #b03a2e;
+      --focus: #9c7a22;
+      --page-bg: radial-gradient(900px 520px at 15% -10%, rgba(212,175,55,.18), transparent 60%), #f7f3ea;
+      --card-shadow: 0 24px 60px rgba(60,45,10,.12);
+      --toggle-bg: #ffffff;
+      color-scheme: light;
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { min-height: 100%; }
     body {
       margin: 0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px 14px;
+      padding: 24px 14px;
       color: var(--text);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
       background: var(--page-bg);
       background-attachment: fixed;
       transition: background .3s ease, color .3s ease;
@@ -72,157 +71,172 @@
 
     .theme-toggle {
       position: fixed; top: 14px; right: 14px; z-index: 10;
-      width: 44px; height: 44px; border-radius: 50%;
-      border: 2px solid var(--line); background: var(--toggle-bg); color: var(--text);
-      font-size: 1.2rem; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,.12);
-      display: grid; place-items: center;
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 1px solid var(--line); background: var(--toggle-bg); color: var(--text);
+      font-size: 1.25rem; cursor: pointer; display: grid; place-items: center;
     }
-    .theme-toggle:hover { transform: scale(1.06); }
+    .theme-toggle:hover { border-color: var(--gold); }
     .theme-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
     .card {
       position: relative;
       width: 100%;
-      max-width: 540px;
+      max-width: 600px;
       background: var(--card);
-      backdrop-filter: blur(6px);
-      border-radius: 24px;
-      padding: 34px 26px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 40px 30px;
       box-shadow: var(--card-shadow);
       text-align: center;
       overflow: hidden;
-      transition: background .3s ease;
     }
     .card::before {
       content: "";
-      position: absolute; top: 0; left: 0; right: 0; height: 6px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-2));
     }
 
     .screen { display: none; }
     .screen.active { display: block; animation: rise .4s ease both; }
     @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    h1 { font-size: 1.9rem; line-height: 1.2; margin: 6px 0 10px; letter-spacing: -.02em; }
-    h2 { font-size: 1.45rem; line-height: 1.25; margin: 6px 0 10px; }
+    h1 { font-size: 2.2rem; line-height: 1.15; margin: 8px 0 14px; letter-spacing: -.02em; font-weight: 800; }
+    h2 { font-size: 1.6rem; line-height: 1.25; margin: 8px 0 12px; }
     .muted { color: var(--muted); }
     .kicker {
-      display: inline-block; margin-bottom: 8px; padding: 6px 12px; border-radius: 99px;
-      background: var(--soft); color: var(--accent); font-size: .8rem; font-weight: 700; letter-spacing: .03em;
+      display: inline-block; margin-bottom: 10px; padding: 7px 14px; border-radius: 99px;
+      border: 1px solid var(--gold-deep); color: var(--gold-2); font-size: .85rem; font-weight: 700; letter-spacing: .12em;
     }
+    html[data-theme="light"] .kicker { color: var(--gold-deep); }
 
-    .hero-emojis { font-size: 58px; margin: 10px 0 4px; animation: float 3.2s ease-in-out infinite; }
+    .hero-emojis { font-size: 60px; margin: 12px 0 6px; animation: float 3.2s ease-in-out infinite; }
     .hero-emojis span { display: inline-block; }
     .hero-emojis span:nth-child(2) { animation: float 3.2s ease-in-out .4s infinite; }
     .hero-emojis span:nth-child(3) { animation: float 3.2s ease-in-out .8s infinite; }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-    .perks { list-style: none; padding: 0; margin: 20px auto 0; display: grid; gap: 8px; max-width: 360px; text-align: left; }
-    .perks li { display: flex; align-items: center; gap: 10px; font-size: .97rem; }
-    .perks li b { font-size: 1.2rem; }
+    .perks { list-style: none; padding: 0; margin: 22px auto 0; display: grid; gap: 10px; max-width: 380px; text-align: left; }
+    .perks li { display: flex; align-items: center; gap: 12px; font-size: 1.05rem; }
+    .perks li b { font-size: 1.3rem; }
 
     .btn-main {
-      display: block; width: 100%; margin-top: 22px; padding: 16px 20px; border: none; border-radius: 14px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #fff;
-      font-size: 1.08rem; font-weight: 800; cursor: pointer; font-family: inherit;
-      box-shadow: 0 10px 24px rgba(108, 76, 245, .35);
+      display: block; width: 100%; margin-top: 26px; padding: 19px 22px; border: none; border-radius: 14px;
+      background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-2)); color: var(--on-gold);
+      font-size: 1.2rem; font-weight: 800; cursor: pointer; font-family: inherit; letter-spacing: .01em;
+      box-shadow: 0 10px 28px rgba(212,175,55,.25);
       transition: transform .12s ease, box-shadow .12s ease;
     }
-    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(108, 76, 245, .42); }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(212,175,55,.35); }
     .btn-main:active { transform: translateY(0); }
-    .btn-main:focus-visible { outline: 3px solid #b3a4ff; outline-offset: 3px; }
+    .btn-main:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
     .btn-ghost {
-      display: block; width: 100%; margin-top: 12px; padding: 12px 20px; border: 2px solid var(--line); border-radius: 14px;
-      background: var(--card-solid); color: var(--accent); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: block; width: 100%; margin-top: 14px; padding: 16px 20px; border: 1px solid var(--line); border-radius: 14px;
+      background: var(--card-2); color: var(--text); font-size: 1.05rem; font-weight: 700; cursor: pointer; font-family: inherit;
     }
-    .btn-ghost:hover { background: var(--soft); }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold-2); }
+    html[data-theme="light"] .btn-ghost:hover { color: var(--gold-deep); }
 
-    .author { margin-top: 18px; font-size: .85rem; }
+    .author { margin-top: 20px; font-size: .95rem; }
 
-    /* Quiz */
-    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-    .progress-text { font-size: .85rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
-    .milestone { font-size: .85rem; color: var(--muted); min-height: 1.2em; }
-    .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
-    .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; transition: width .45s ease; }
-    .q-num { display: inline-block; margin: 18px 0 4px; font-size: .85rem; color: var(--muted); }
-    #question { font-size: 1.3rem; margin: 0 0 14px; }
+    /* ===== Quiz: respostas grandes ===== */
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .progress-text { font-size: 1rem; font-weight: 800; color: var(--gold-2); white-space: nowrap; }
+    html[data-theme="light"] .progress-text { color: var(--gold-deep); }
+    .milestone { font-size: .98rem; color: var(--muted); min-height: 1.3em; }
+    .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+    .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold-deep), var(--gold-2)); border-radius: 99px; transition: width .45s ease; }
+    .q-num { display: inline-block; margin: 22px 0 6px; font-size: .95rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+    #question { font-size: 1.6rem; line-height: 1.3; margin: 0 0 20px; }
 
-    .options { display: grid; gap: 10px; }
+    .options { display: grid; gap: 14px; }
     .option {
-      display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 14px;
-      border: 2px solid var(--line); border-radius: 14px; background: var(--option-bg); color: var(--text);
-      font-size: 1rem; text-align: left; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 16px; width: 100%; min-height: 76px; padding: 18px 18px;
+      border: 1px solid var(--line); border-radius: 16px; background: var(--card-2); color: var(--text);
+      font-size: 1.2rem; line-height: 1.35; text-align: left; cursor: pointer; font-family: inherit;
       transition: border-color .15s ease, background .15s ease, transform .12s ease;
     }
-    .option:hover { border-color: var(--accent); background: var(--soft); transform: translateX(3px); }
-    .option:focus-visible { outline: 3px solid #b3a4ff; outline-offset: 2px; }
+    .option:hover { border-color: var(--gold); background: var(--card); transform: translateX(3px); }
+    .option:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
     .letter {
-      flex-shrink: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
-      background: var(--soft); color: var(--accent); font-weight: 800; font-size: .9rem;
+      flex-shrink: 0; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--gold-deep); color: var(--gold-2); font-weight: 800; font-size: 1.05rem;
     }
-    .option:hover .letter { background: var(--accent); color: #fff; }
+    html[data-theme="light"] .letter { color: var(--gold-deep); }
+    .option:hover .letter { background: var(--gold); color: var(--on-gold); border-color: var(--gold); }
 
-    /* Gate */
+    /* ===== Desbloqueio ===== */
     .teaser {
-      position: relative; margin: 18px 0 6px; padding: 22px 16px; border-radius: 18px;
-      background: var(--teaser-bg); overflow: hidden;
+      position: relative; margin: 22px 0 8px; padding: 26px 18px; border-radius: 18px;
+      background: var(--card-2); border: 1px solid var(--line); overflow: hidden;
     }
-    .teaser .label { font-size: .85rem; color: var(--muted); }
-    .teaser .blur { margin-top: 6px; font-size: 1.7rem; font-weight: 800; filter: blur(7px); user-select: none; color: var(--text); }
+    .teaser .label { font-size: 1rem; color: var(--muted); }
+    .teaser .blur { margin-top: 8px; font-size: 1.8rem; font-weight: 800; filter: blur(7px); user-select: none; color: var(--text); }
     .teaser .lock {
-      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: var(--lock-bg); font-size: 2.2rem;
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      background: rgba(11,10,9,.35); font-size: 2.2rem;
     }
-    .teaser .lock small { font-size: .8rem; font-weight: 700; color: var(--accent); background: var(--card-solid); padding: 4px 10px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    html[data-theme="light"] .teaser .lock { background: rgba(247,243,234,.4); }
+    .teaser .lock small { font-size: .92rem; font-weight: 700; color: var(--on-gold); background: linear-gradient(90deg, var(--gold-deep), var(--gold-2)); padding: 6px 14px; border-radius: 99px; }
 
     .social {
-      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; margin-top: 12px;
-      padding: 13px 20px; border: none; border-radius: 14px; font-size: 1.02rem; font-weight: 800; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 60px; margin-top: 14px;
+      padding: 15px 20px; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 800; font-family: inherit;
       text-decoration: none; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
     }
-    .social svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .social svg { width: 26px; height: 26px; flex-shrink: 0; }
     .social:hover { transform: translateY(-2px); filter: brightness(1.05); }
     .social:active { transform: translateY(0); }
-    .social:focus-visible { outline: 3px solid #9b8cff; outline-offset: 2px; }
+    .social:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
     .social:disabled { opacity: .5; cursor: default; transform: none; }
     .social.youtube { background: #FF0000; color: #fff; box-shadow: 0 8px 20px rgba(255,0,0,.28); }
     .social.youtube.outline { background: #fff; color: #FF0000; border: 2px solid #FF0000; box-shadow: none; }
     .social.instagram { background: linear-gradient(45deg,#F58529 0%,#DD2A7B 50%,#8134AF 75%,#515BD4 100%); color: #fff; box-shadow: 0 8px 20px rgba(221,42,123,.3); }
 
-    .gate-note { margin: 14px 0 0; font-size: .9rem; }
-    .gate-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-    .msg { min-height: 1.4em; margin: 0 0 4px; font-weight: 600; }
+    .gate-note { margin: 16px 0 0; font-size: 1rem; }
+    .gate-box { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .msg { min-height: 1.5em; margin: 0 0 4px; font-weight: 600; font-size: 1.02rem; }
     .error { color: var(--error); }
 
-    /* Result */
+    /* ===== Resultado ===== */
     .result-card {
-      margin-top: 14px; padding: 28px 20px; border-radius: 20px;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--theme) 16%, var(--card-solid)), color-mix(in srgb, var(--theme) 6%, var(--card-solid)));
-      border: 2px solid color-mix(in srgb, var(--theme) 35%, transparent);
+      margin-top: 16px; padding: 30px 24px; border-radius: 20px; text-align: left;
+      background: var(--card-2); border: 1px solid var(--gold-deep);
     }
-    .result-emoji { font-size: 72px; line-height: 1; animation: pop .6s cubic-bezier(.2,1.6,.4,1) both; }
-    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    #result-title { color: var(--theme); font-size: 2rem; margin: 10px 0 8px; }
-    #result-text { line-height: 1.65; margin: 0; }
-    .share-title { margin: 22px 0 0; font-weight: 700; }
+    .result-kicker { font-size: .9rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    #result-title { color: var(--gold-2); font-size: 2.3rem; line-height: 1.15; margin: 8px 0 18px; font-weight: 800; }
+    html[data-theme="light"] #result-title { color: var(--gold-deep); }
+    .result-body p { font-size: 1.15rem; line-height: 1.7; margin: 0 0 14px; }
+    .result-body p:last-child { margin-bottom: 0; }
+    .reflect {
+      margin-top: 22px; padding: 18px 20px; border-left: 3px solid var(--gold); background: var(--card);
+      border-radius: 0 12px 12px 0;
+    }
+    .reflect b { display: block; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-2); margin-bottom: 6px; }
+    html[data-theme="light"] .reflect b { color: var(--gold-deep); }
+    .reflect p { margin: 0; font-size: 1.12rem; line-height: 1.6; }
+
+    .share-title { margin: 26px 0 0; font-weight: 700; font-size: 1.1rem; }
     .btn-wa {
-      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 10px; padding: 14px;
-      border-radius: 14px; background: #25D366; color: #fff; font-weight: 800; font-size: 1rem; text-decoration: none; font-family: inherit;
-      box-shadow: 0 8px 20px rgba(37,211,102,.3);
+      display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; margin-top: 12px; padding: 17px;
+      border-radius: 14px; background: #25D366; color: #fff; font-weight: 800; font-size: 1.1rem; text-decoration: none; font-family: inherit;
+      box-shadow: 0 8px 20px rgba(37,211,102,.25);
     }
-    .btn-wa svg { width: 22px; height: 22px; }
+    .btn-wa svg { width: 24px; height: 24px; }
 
     @media (max-width: 480px) {
-      .card { padding: 26px 18px; border-radius: 20px; }
-      h1 { font-size: 1.6rem; }
-      .hero-emojis { font-size: 48px; }
+      body { font-size: 17px; }
+      .card { padding: 30px 20px; border-radius: 18px; }
+      h1 { font-size: 1.85rem; }
+      #question { font-size: 1.4rem; }
+      .option { font-size: 1.1rem; padding: 16px 14px; }
+      #result-title { font-size: 1.95rem; }
+      .hero-emojis { font-size: 50px; }
     }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
-<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Usar tema escuro">🌙</button>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Usar tema claro">☀️</button>
 <main class="card">
 
   <!-- INÍCIO -->
@@ -230,10 +244,10 @@
     <span class="kicker">TESTE DE PERSONALIDADE</span>
     <div class="hero-emojis" aria-hidden="true"><span>🤩</span><span>🏛️</span><span>💗</span></div>
     <h1>Você se conhece<br>de verdade?</h1>
-    <p class="muted">Responda 20 perguntas rápidas e descubra qual perfil define a sua personalidade.</p>
+    <p class="muted">Responda 20 perguntas e descubra qual perfil define a sua personalidade, com a definição real de cada um.</p>
     <ul class="perks">
       <li><b>⏱️</b> Leva menos de 2 minutos</li>
-      <li><b>🎯</b> Resultado feito para você</li>
+      <li><b>🎯</b> Resultado com definição e reflexão</li>
       <li><b>🎁</b> Totalmente grátis</li>
     </ul>
     <button id="btn-start" class="btn-main">Quero descobrir meu perfil →</button>
@@ -254,8 +268,8 @@
 
   <!-- DESBLOQUEIO -->
   <section id="s-gate" class="screen">
-    <span class="kicker">🎉 RESULTADO PRONTO</span>
-    <h2>Seu perfil já foi revelado!</h2>
+    <span class="kicker">RESULTADO PRONTO</span>
+    <h2>Seu perfil já foi revelado</h2>
     <p class="muted">Falta um último passo para desbloquear. Leva menos de 10 segundos.</p>
 
     <div class="teaser" aria-hidden="true">
@@ -289,11 +303,15 @@
   <section id="s-result" class="screen">
     <span class="kicker">SEU RESULTADO</span>
     <div class="result-card">
-      <div class="result-emoji" id="result-emoji" aria-hidden="true"></div>
+      <div class="result-kicker" id="result-kicker"></div>
       <h2 id="result-title"></h2>
-      <p id="result-text"></p>
+      <div class="result-body" id="result-body"></div>
+      <div class="reflect">
+        <b>Para refletir</b>
+        <p id="result-reflect"></p>
+      </div>
     </div>
-    <p class="share-title">Descubra com quem você combina 👀</p>
+    <p class="share-title">Quer comparar com alguém?</p>
     <a id="btn-share" class="btn-wa" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.7-1.7c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c.6.3 1.1.4 1.5.5a3.6 3.6 0 0 0 1.7.1 2.8 2.8 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c0-.1-.2-.2-.4-.3z"/></svg>
       Enviar no WhatsApp
@@ -347,36 +365,55 @@ const QUESTIONS = [
   { q: 'Se pudesse escolher uma nova habilidade, qual seria?', o: [['Ser muito conhecido(a) por algo que faz bem','A'],['Entender o que as pessoas não dizem','B'],['Dominar a própria mente e as emoções','C'],['Dominar uma ferramenta que resolve problemas rápido','D']] }
 ];
 
-/* ===== RESULTADOS E VISUAL DE CADA PERFIL ===== */
+/* ===== RESULTADOS =====
+   Definições baseadas em conceitos reais da psicologia e da filosofia.
+   Descrevem traços, não diagnósticos. Narcisismo clínico (transtorno) só um profissional avalia.
+*/
 const RESULTS = {
   A: {
     title: 'O Narcisista',
-    emoji: '🤩',
-    text: 'Você tem confiança de sobra e gosta de ser visto(a) pelo seu valor. Carisma e presença são seus pontos fortes. Use esse brilho a seu favor, sem esquecer que os outros também querem ser vistos.',
-    color: '#8e24aa', bg1: '#f6e9fb', bg2: '#efd9f7'
+    kicker: 'Perfil com foco em imagem e admiração',
+    body: [
+      'Narcisismo é um traço de personalidade marcado por uma autoimagem elevada, pela necessidade constante de admiração e por dificuldade de se colocar no lugar do outro quando isso contraria o seu interesse.',
+      'Em graus leves, é comum e até útil: ajuda a se apresentar com confiança, a defender o próprio trabalho e a seguir em frente depois de uma crítica. O problema aparece quando a validação externa vira a principal medida de valor, porque a relação passa a girar em torno de quem admira você.',
+      'Vale distinguir: o traço é um jeito de funcionar; o Transtorno de Personalidade Narcisista é um padrão persistente que causa prejuízo significativo, e só um profissional de saúde mental pode avaliá-lo.'
+    ],
+    reflect: 'Quando foi a última vez que você ouviu uma história inteira de alguém sem pensar em como ela te coloca em evidência?'
   },
   B: {
     title: 'O Empático',
-    emoji: '💗',
-    text: 'Você sente o que as pessoas sentem e costuma ser colo de quem precisa. Sua sensibilidade é um presente, desde que você também cuide do seu próprio coração.',
-    color: '#00897b', bg1: '#e6f7f4', bg2: '#d3f1eb'
+    kicker: 'Perfil com foco em sentir e cuidar do outro',
+    body: [
+      'Empatia é a capacidade de entender e, em alguma medida, sentir o que o outro sente. Pesquisadores costumam separar duas formas: a cognitiva, que é compreender o ponto de vista alheio, e a afetiva, que é ressoar com a emoção da outra pessoa.',
+      'Quem tem alta empatia percebe nuances, acolhe bem e costuma criar relações de confiança. O risco está em absorver demais o sofrimento alheio e se esgotar, fenômeno que a psicologia chama de fadiga por compaixão.',
+      'Empatia saudável inclui limites: cuidar do outro sem assumir a responsabilidade pela felicidade de todos.'
+    ],
+    reflect: 'O cuidado que você oferece aos outros também chega até você? Quem cuida de você nos dias em que você está cansado(a)?'
   },
   C: {
     title: 'O Estoico',
-    emoji: '🏛️',
-    text: 'Você mantém a calma quando o mundo acelera. Sabe separar o que controla do que não controla e encara os desafios com serenidade e firmeza.',
-    color: '#546e7a', bg1: '#eef2f4', bg2: '#dfe6ea'
+    kicker: 'Perfil com foco em controle e serenidade',
+    body: [
+      'O estoicismo é uma escola filosófica greco-romana fundada por Zenão de Cítio, em Atenas, por volta de 300 a.C. Seus principais nomes são Epicteto, Sêneca e Marco Aurélio.',
+      'A ideia central é a dicotomia do controle: separar o que depende de nós (nossos juízos, escolhas e ações) do que não depende (a opinião alheia, o corpo, a sorte e os acontecimentos). Para os estoicos, a serenidade nasce de focar no primeiro grupo e aceitar o segundo com sabedoria.',
+      'Um erro comum é achar que o estoicismo pede frieza ou a negação das emoções. Na prática, ele pede que você examine suas reações antes de agir, e que trate a virtude, como coragem, justiça e temperança, como o único bem verdadeiro.'
+    ],
+    reflect: 'Escolha uma situação difícil de hoje e divida-a em duas colunas: o que depende de você e o que não depende. Onde você está gastando energia na coluna errada?'
   },
   D: {
     title: 'O Pragmático',
-    emoji: '🎯',
-    text: 'Você olha para resultados, age com objetividade e resolve problemas com eficiência. Para você, o que funciona importa mais do que o que parece bonito.',
-    color: '#1e63d6', bg1: '#eaf2ff', bg2: '#d8e7ff'
+    kicker: 'Perfil com foco em resultado e ação',
+    body: [
+      'O pragmatismo é uma corrente filosófica norte-americana, associada a Charles S. Peirce, William James e John Dewey. Ela avalia ideias e decisões pelas suas consequências práticas: uma crença vale o que ela permite fazer e resolver.',
+      'Como traço de personalidade, o pragmático prioriza o que funciona, decide com base em evidências e ajusta o método quando algo não dá certo. Costuma ser eficiente, objetivo e confiável sob pressão.',
+      'O risco é tratar como irrelevante tudo o que não se mede em resultado, como valores, vínculos e sentido. Nem toda decisão importante cabe numa planilha.'
+    ],
+    reflect: 'Quais das suas últimas decisões você tomou só pelo resultado esperado? E quais também levaram em conta o que você valoriza?'
   }
 };
 
 // Mensagens que aparecem em marcos do quiz (mantêm a pessoa engajada)
-const MILESTONES = { 1: 'Ótimo começo! 🚀', 5: 'Já está no caminho! ✨', 10: 'Metade do caminho! 🎯', 15: 'Falta pouco! 🔥', 19: 'Última pergunta! 🏁' };
+const MILESTONES = { 1: 'Ótimo começo!', 5: 'Já está no caminho!', 10: 'Metade do caminho!', 15: 'Falta pouco!', 19: 'Última pergunta!' };
 
 /* ===== ESTADO E UTILITÁRIOS ===== */
 const $ = id => document.getElementById(id);
@@ -481,7 +518,7 @@ async function checkYouTubeSubscription(accessToken) {
     if (data.items && data.items.length > 0) {
       ytUnlocked = true;
       sessionStorage.setItem('ytUnlocked', '1');
-      setMsg('Inscrição confirmada! 🎉');
+      setMsg('Inscrição confirmada!');
       tryShowResult();
     } else {
       setMsg('Não encontramos sua inscrição no canal. Inscreva-se e tente de novo.', true);
@@ -510,7 +547,7 @@ function verifyYouTube() {
   if (CONFIG.DEMO_UNLOCK_YOUTUBE) {
     ytUnlocked = true;
     sessionStorage.setItem('ytUnlocked', '1');
-    setMsg('Inscrição confirmada! 🎉');
+    setMsg('Inscrição confirmada!');
     tryShowResult();
     return;
   }
@@ -544,15 +581,19 @@ function tryShowResult() {
 
 function showResult() {
   const r = RESULTS[resultKey];
-  const card = document.querySelector('.result-card');
-  card.style.setProperty('--theme', r.color);
-  card.style.setProperty('--theme-bg-1', r.bg1);
-  card.style.setProperty('--theme-bg-2', r.bg2);
-  $('result-emoji').textContent = r.emoji;
+  $('result-kicker').textContent = r.kicker;
   $('result-title').textContent = r.title;
-  $('result-text').textContent = r.text;
 
-  const msg = `Fiz o teste de personalidade e o meu resultado foi: ${r.title} ${r.emoji}. Faça você também: ${location.href}`;
+  const body = $('result-body');
+  body.replaceChildren();
+  r.body.forEach(par => {
+    const p = document.createElement('p');
+    p.textContent = par;
+    body.appendChild(p);
+  });
+  $('result-reflect').textContent = r.reflect;
+
+  const msg = `Fiz o teste de personalidade e o meu perfil foi: ${r.title}. Faça você também: ${location.href}`;
   $('btn-share').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
 
   show('result');
@@ -560,14 +601,11 @@ function showResult() {
 
 function restart() {
   answers = []; current = 0; resultKey = null;
-  sessionStorage.removeItem('igStart');
-  sessionStorage.removeItem('ytUnlocked');
-  ytUnlocked = false;
+  resetUnlock();
   show('intro');
 }
 
-/* ===== EVENTOS ===== */
-/* ===== TEMA ===== */
+/* ===== TEMA (escuro por padrão, como a landing) ===== */
 function applyTheme(t) {
   document.documentElement.dataset.theme = t;
   const btn = $('theme-toggle');
@@ -577,8 +615,7 @@ function applyTheme(t) {
 function initTheme() {
   let saved = null;
   try { saved = localStorage.getItem('theme'); } catch (e) {}
-  const system = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  applyTheme(saved || system);
+  applyTheme(saved === 'light' ? 'light' : 'dark');
 }
 $('theme-toggle').onclick = () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -587,6 +624,7 @@ $('theme-toggle').onclick = () => {
 };
 initTheme();
 
+/* ===== EVENTOS ===== */
 $('author').textContent = CONFIG.AUTHOR_NAME;
 $('btn-start').onclick = () => { answers = []; current = 0; resetUnlock(); renderQuestion(); show('quiz'); };
 $('yt-verify').onclick = verifyYouTube;
